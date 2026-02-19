@@ -14,16 +14,16 @@ const HeroSection = () => {
 
       <div className="relative z-10 container mx-auto px-6 py-24 text-center max-w-4xl">
         <p className="text-primary font-body tracking-[0.3em] uppercase text-sm mb-6 animate-fade-in">
-          🌿 Programme d'Activation & de Transformation
+          🔥 Activation de la Kundalini & Souveraineté Intérieure
         </p>
 
         <h1 className="font-heading text-5xl md:text-7xl font-light leading-tight mb-8 animate-fade-in-up text-foreground">
-          Active ta <span className="text-gradient-gold italic font-medium">Kundalini</span> et incarne pleinement ton{" "}
-          <span className="text-gradient-gold italic font-medium">pouvoir souverain</span>
+          Retrouver votre <span className="text-gradient-gold italic font-medium">énergie</span>. Devenir pleinement{" "}
+          <span className="text-gradient-gold italic font-medium">vous</span>.
         </h1>
 
         <p className="font-body text-muted-foreground text-lg md:text-xl leading-relaxed mb-12 max-w-2xl mx-auto opacity-0 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          Un accompagnement structuré pour éliminer tes blocages, comprendre ton incarnation et activer ton feu sacré.
+          Vous reconnecter à votre corps. Sortir des illusions. Un accompagnement structuré pour éliminer vos blocages et activer votre feu sacré.
         </p>
 
         <button
