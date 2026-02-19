@@ -9,6 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactFormDialogProps {
   open: boolean;
@@ -26,28 +27,44 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
     lieuNaissance: "",
     heureNaissance: "",
   });
+  const [sending, setSending] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.prenom || !form.nom || !form.email) {
       toast.error("Merci de remplir au moins le prénom, le nom et l'email.");
       return;
     }
-    toast.success("Merci ! Ta demande a bien été envoyée. 🌿");
-    setForm({
-      prenom: "",
-      nom: "",
-      email: "",
-      telephone: "",
-      dateNaissance: "",
-      lieuNaissance: "",
-      heureNaissance: "",
-    });
-    onOpenChange(false);
+
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-contact", {
+        body: { ...form, offerName },
+      });
+
+      if (error) throw error;
+
+      toast.success("Merci ! Ta demande a bien été envoyée. 🌿");
+      setForm({
+        prenom: "",
+        nom: "",
+        email: "",
+        telephone: "",
+        dateNaissance: "",
+        lieuNaissance: "",
+        heureNaissance: "",
+      });
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de l'envoi. Réessaie plus tard.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -66,89 +83,46 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="prenom" className="font-body text-foreground/80">Prénom *</Label>
-              <Input
-                id="prenom"
-                value={form.prenom}
-                onChange={(e) => handleChange("prenom", e.target.value)}
-                maxLength={100}
-                className="bg-background border-border"
-              />
+              <Input id="prenom" value={form.prenom} onChange={(e) => handleChange("prenom", e.target.value)} maxLength={100} className="bg-background border-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="nom" className="font-body text-foreground/80">Nom *</Label>
-              <Input
-                id="nom"
-                value={form.nom}
-                onChange={(e) => handleChange("nom", e.target.value)}
-                maxLength={100}
-                className="bg-background border-border"
-              />
+              <Input id="nom" value={form.nom} onChange={(e) => handleChange("nom", e.target.value)} maxLength={100} className="bg-background border-border" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email" className="font-body text-foreground/80">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              maxLength={255}
-              className="bg-background border-border"
-            />
+            <Input id="email" type="email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} maxLength={255} className="bg-background border-border" />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="telephone" className="font-body text-foreground/80">Téléphone</Label>
-            <Input
-              id="telephone"
-              type="tel"
-              value={form.telephone}
-              onChange={(e) => handleChange("telephone", e.target.value)}
-              maxLength={20}
-              className="bg-background border-border"
-            />
+            <Input id="telephone" type="tel" value={form.telephone} onChange={(e) => handleChange("telephone", e.target.value)} maxLength={20} className="bg-background border-border" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="dateNaissance" className="font-body text-foreground/80">Date de naissance</Label>
-              <Input
-                id="dateNaissance"
-                type="date"
-                value={form.dateNaissance}
-                onChange={(e) => handleChange("dateNaissance", e.target.value)}
-                className="bg-background border-border"
-              />
+              <Input id="dateNaissance" type="date" value={form.dateNaissance} onChange={(e) => handleChange("dateNaissance", e.target.value)} className="bg-background border-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="heureNaissance" className="font-body text-foreground/80">Heure de naissance</Label>
-              <Input
-                id="heureNaissance"
-                type="time"
-                value={form.heureNaissance}
-                onChange={(e) => handleChange("heureNaissance", e.target.value)}
-                className="bg-background border-border"
-              />
+              <Input id="heureNaissance" type="time" value={form.heureNaissance} onChange={(e) => handleChange("heureNaissance", e.target.value)} className="bg-background border-border" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="lieuNaissance" className="font-body text-foreground/80">Lieu de naissance</Label>
-            <Input
-              id="lieuNaissance"
-              value={form.lieuNaissance}
-              onChange={(e) => handleChange("lieuNaissance", e.target.value)}
-              maxLength={200}
-              className="bg-background border-border"
-            />
+            <Input id="lieuNaissance" value={form.lieuNaissance} onChange={(e) => handleChange("lieuNaissance", e.target.value)} maxLength={200} className="bg-background border-border" />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4"
+            disabled={sending}
+            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4 disabled:opacity-50"
           >
-            Envoyer ma demande
+            {sending ? "Envoi en cours…" : "Envoyer ma demande"}
           </button>
         </form>
       </DialogContent>
