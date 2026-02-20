@@ -9,13 +9,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ContactFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   offerName?: string;
 }
+
+const WHATSAPP_NUMBER = "41762445552";
 
 const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogProps) => {
   const [form, setForm] = useState({
@@ -27,44 +28,45 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
     lieuNaissance: "",
     heureNaissance: "",
   });
-  const [sending, setSending] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.prenom || !form.nom || !form.email) {
       toast.error("Merci de remplir au moins le prénom, le nom et l'email.");
       return;
     }
 
-    setSending(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("send-contact", {
-        body: { ...form, offerName },
-      });
+    const message = [
+      offerName ? `*Offre choisie :* ${offerName}` : "",
+      `*Prénom :* ${form.prenom}`,
+      `*Nom :* ${form.nom}`,
+      `*Email :* ${form.email}`,
+      form.telephone ? `*Téléphone :* ${form.telephone}` : "",
+      form.dateNaissance ? `*Date de naissance :* ${form.dateNaissance}` : "",
+      form.lieuNaissance ? `*Lieu de naissance :* ${form.lieuNaissance}` : "",
+      form.heureNaissance ? `*Heure de naissance :* ${form.heureNaissance}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
-      if (error) throw error;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
 
-      toast.success("Merci ! Ta demande a bien été envoyée. 🌿");
-      setForm({
-        prenom: "",
-        nom: "",
-        email: "",
-        telephone: "",
-        dateNaissance: "",
-        lieuNaissance: "",
-        heureNaissance: "",
-      });
-      onOpenChange(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Erreur lors de l'envoi. Réessaie plus tard.");
-    } finally {
-      setSending(false);
-    }
+    toast.success("Redirection vers WhatsApp… 🌿");
+    setForm({
+      prenom: "",
+      nom: "",
+      email: "",
+      telephone: "",
+      dateNaissance: "",
+      lieuNaissance: "",
+      heureNaissance: "",
+    });
+    onOpenChange(false);
   };
 
   return (
@@ -75,7 +77,7 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
             {offerName ? `Réserver — ${offerName}` : "Réserver un appel découverte"}
           </DialogTitle>
           <DialogDescription className="font-body text-muted-foreground">
-            Remplis ce formulaire et je te recontacte rapidement.
+            Remplis ce formulaire et je te recontacte sur WhatsApp.
           </DialogDescription>
         </DialogHeader>
 
@@ -119,10 +121,9 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
 
           <button
             type="submit"
-            disabled={sending}
-            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4 disabled:opacity-50"
+            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4"
           >
-            {sending ? "Envoi en cours…" : "Envoyer ma demande"}
+            Envoyer via WhatsApp
           </button>
         </form>
       </DialogContent>
