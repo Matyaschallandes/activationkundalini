@@ -9,7 +9,7 @@ const offers = [
     duration: "~1h",
     description: "Lecture d'âme et mini activation pour découvrir ton potentiel.",
     features: [
-      "Lecture d'âme (carte du ciel + Ba Zi)",
+      "Lecture d'âme (carte du ciel + bodygraph)",
       "Mini soin de bannissement",
       "Mini activation Kundalini",
       "Élimination des blocages",
