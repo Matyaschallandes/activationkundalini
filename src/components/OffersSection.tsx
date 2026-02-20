@@ -72,6 +72,21 @@ const offers = [
 
 const alaCarteOffers = [
   {
+    name: "Initiation Reiki Kundalini",
+    price: "300",
+    duration: "4 niveaux · Programme complet",
+    description: "Une mini formation transformatrice pour apprendre à donner des soins énergétiques puissants. À distance ou en présentiel, avec suivi personnalisé.",
+    features: [
+      "4 niveaux d'initiation progressifs",
+      "Activation à distance ou en présentiel",
+      "Toutes les techniques enseignées",
+      "Programme complet pour pratiquer les soins",
+      "Suivi personnalisé inclus",
+      "Énergie Kundalini d'une puissance exceptionnelle",
+    ],
+    special: true,
+  },
+  {
     name: "Nettoyage de Maison",
     price: "80",
     duration: "~1h",
@@ -83,6 +98,7 @@ const alaCarteOffers = [
       "Détection des perturbations électromagnétiques",
       "En présentiel ou à distance (photos)",
     ],
+    special: false,
   },
   {
     name: "Soin Énergétique",
@@ -95,6 +111,7 @@ const alaCarteOffers = [
       "Techniques énergétiques avancées",
       "Nettoyage et rééquilibrage du corps énergétique",
     ],
+    special: false,
   },
   {
     name: "Lecture d'Âme au Pendule",
@@ -108,6 +125,7 @@ const alaCarteOffers = [
       "Maladies chroniques et problèmes d'incarnation",
       "Guidance personnalisée",
     ],
+    special: false,
   },
 ];
 
@@ -191,7 +209,7 @@ const OffersSection = () => {
           ))}
         </div>
 
-        {/* À la carte */}
+        {/* Services à la carte */}
         <div className="mt-20">
           <p className="text-primary font-body tracking-[0.3em] uppercase text-xs text-center mb-4">
             Services individuels
@@ -201,12 +219,22 @@ const OffersSection = () => {
           </h3>
           <div className="glow-line w-16 mx-auto mb-12" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {alaCarteOffers.map((offer, i) => (
               <div
                 key={i}
-                className="relative rounded-sm p-8 border border-border bg-card/60 hover:border-primary/20 transition-all duration-500 flex flex-col"
+                className={`relative rounded-sm p-8 border transition-all duration-500 flex flex-col ${
+                  offer.special
+                    ? "border-primary/50 bg-card shadow-gold"
+                    : "border-border bg-card/60 hover:border-primary/20"
+                }`}
               >
+                {offer.special && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-gold text-primary-foreground font-body text-xs font-semibold tracking-wider uppercase px-4 py-1 rounded-sm whitespace-nowrap">
+                    Formation
+                  </div>
+                )}
+
                 <h3 className="font-heading text-2xl text-foreground mb-1">{offer.name}</h3>
                 <p className="text-muted-foreground font-body text-sm mb-6">{offer.duration}</p>
 
@@ -228,9 +256,13 @@ const OffersSection = () => {
 
                 <button
                   onClick={() => handleChoose(offer.name)}
-                  className="block w-full text-center font-body text-sm font-semibold tracking-wider uppercase py-3 rounded-sm transition-all duration-300 border border-primary/30 text-primary hover:bg-primary/10"
+                  className={`block w-full text-center font-body text-sm font-semibold tracking-wider uppercase py-3 rounded-sm transition-all duration-300 ${
+                    offer.special
+                      ? "bg-gradient-gold text-primary-foreground hover:shadow-gold"
+                      : "border border-primary/30 text-primary hover:bg-primary/10"
+                  }`}
                 >
-                  Réserver ce service
+                  {offer.special ? "Commencer la formation" : "Réserver ce service"}
                 </button>
               </div>
             ))}
