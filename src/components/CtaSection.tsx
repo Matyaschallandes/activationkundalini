@@ -18,8 +18,11 @@ const CtaSection = () => {
         </h2>
         <div className="glow-line w-24 mx-auto mb-8" />
 
-        <p className="font-body text-muted-foreground text-lg mb-12 leading-relaxed">
+        <p className="font-body text-muted-foreground text-lg mb-4 leading-relaxed">
           Réserve ton appel découverte et commençons ensemble ta transformation profonde.
+        </p>
+        <p className="font-body text-muted-foreground/70 text-sm mb-12">
+          En présentiel ou à distance (Zoom · WhatsApp vidéo · sur photo)
         </p>
 
         <button
