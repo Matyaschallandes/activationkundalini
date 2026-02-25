@@ -9,14 +9,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Mail, Phone } from "lucide-react";
 
 interface ContactFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   offerName?: string;
 }
-
-const WHATSAPP_NUMBER = "41762445552";
 
 const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogProps) => {
   const [form, setForm] = useState({
@@ -28,45 +28,44 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
     lieuNaissance: "",
     heureNaissance: "",
   });
+  const [sending, setSending] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.prenom || !form.nom || !form.email) {
       toast.error("Merci de remplir au moins le prénom, le nom et l'email.");
       return;
     }
 
-    const message = [
-      offerName ? `*Offre choisie :* ${offerName}` : "",
-      `*Prénom :* ${form.prenom}`,
-      `*Nom :* ${form.nom}`,
-      `*Email :* ${form.email}`,
-      form.telephone ? `*Téléphone :* ${form.telephone}` : "",
-      form.dateNaissance ? `*Date de naissance :* ${form.dateNaissance}` : "",
-      form.lieuNaissance ? `*Lieu de naissance :* ${form.lieuNaissance}` : "",
-      form.heureNaissance ? `*Heure de naissance :* ${form.heureNaissance}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-contact", {
+        body: { ...form, offerName },
+      });
 
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
+      if (error) throw error;
 
-    toast.success("Redirection vers WhatsApp… 🌿");
-    setForm({
-      prenom: "",
-      nom: "",
-      email: "",
-      telephone: "",
-      dateNaissance: "",
-      lieuNaissance: "",
-      heureNaissance: "",
-    });
-    onOpenChange(false);
+      toast.success("Demande envoyée avec succès ! Je vous recontacte rapidement 🌿");
+      setForm({
+        prenom: "",
+        nom: "",
+        email: "",
+        telephone: "",
+        dateNaissance: "",
+        lieuNaissance: "",
+        heureNaissance: "",
+      });
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de l'envoi. Vous pouvez me contacter directement par téléphone ou email.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -77,7 +76,7 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
             {offerName ? `Réserver — ${offerName}` : "Réserver un appel découverte"}
           </DialogTitle>
           <DialogDescription className="font-body text-muted-foreground">
-            Remplis ce formulaire et je te recontacte sur WhatsApp.
+            Remplis ce formulaire et je te recontacte rapidement.
           </DialogDescription>
         </DialogHeader>
 
@@ -121,10 +120,28 @@ const ContactFormDialog = ({ open, onOpenChange, offerName }: ContactFormDialogP
 
           <button
             type="submit"
-            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4"
+            disabled={sending}
+            className="w-full bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider uppercase text-sm py-3 rounded-sm hover:shadow-gold transition-all duration-300 mt-4 disabled:opacity-50"
           >
-            Envoyer via WhatsApp
+            {sending ? "Envoi en cours…" : "Envoyer ma demande"}
           </button>
+
+          <div className="pt-4 border-t border-border/50 mt-4">
+            <p className="font-body text-xs text-muted-foreground text-center mb-3">
+              Vous pouvez aussi me contacter directement :
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm">
+              <a href="tel:+41762445552" className="flex items-center gap-2 font-body text-foreground/70 hover:text-primary transition-colors">
+                <Phone className="w-3.5 h-3.5" />
+                +41 76 244 55 52
+              </a>
+              <span className="hidden sm:inline text-border">|</span>
+              <a href="mailto:matyas.challandes@gmail.com" className="flex items-center gap-2 font-body text-foreground/70 hover:text-primary transition-colors">
+                <Mail className="w-3.5 h-3.5" />
+                matyas.challandes@gmail.com
+              </a>
+            </div>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
