@@ -63,6 +63,7 @@ const Index = () => {
       <Programme21Section />
       <JourneySection />
       <WhyMeSection />
+      <GoogleReviewsBadge />
       <CtaSection />
       <Footer />
       <SeoKeywords />
